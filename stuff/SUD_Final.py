@@ -1,4 +1,4 @@
-from Revision.stuff.SUD_GameObjects import Tile, Mobile
+from Revision.stuff.SUD_GameObjects import Tile, Mobile, Tangible
 
 
 class Game(object):
@@ -14,6 +14,7 @@ class Game(object):
         self.maze = []
         self.playing = True
         self.mobs = []
+        self.things = []
 
         with open(map_file, 'r') as fp:
             for line in fp:
@@ -45,17 +46,24 @@ class Game(object):
         :param new_y: the y position the mobile is moving to
         :return: True if the move was completed
         """
-        if not mob.is_alive():  # check to see if the mob is alive
-            self.remove_mob(mob)  # if not, remove it
-            return False  # this is a failed move
-
         if not new_x or not new_y:  # if x and y aren't set
             new_x = mob.x  # set x to current x
             new_y = mob.y  # set y to current y
 
         future_tile = self.maze[new_y][new_x]  # future_tile is more descriptive of what I'm doing
+        if isinstance(future_tile.contains, Tangible):
+            future_tile.contains.touch(mob)
+            self.remove_thing(future_tile.contains)
+            return False
+
         if not future_tile.is_traversable():  # if future_tile is not traversable fail
             return False
+
+        if not mob.is_alive():  # check to see if the mob is alive
+            self.remove_mob(mob)  # if not, remove it
+            return False  # this is a failed move
+
+
 
         # if future tile has an object in it, fail
         if future_tile.contains and mob is not future_tile.contains:
@@ -100,6 +108,14 @@ class Game(object):
         print(f'{mob1.show()} hits {mob2.show()} -> {mob2.hp}')
         mob2.hit(1)
 
+    def add_thing(self, thing):
+        self.things.append(thing)
+        self.maze[thing.y][thing.x].contains = thing
+
+    def remove_thing(self, thing):
+        self.things.remove(thing)
+        self.maze[thing.y][thing.x].contains = None
+
 
 class Player(Mobile):
     """
@@ -141,9 +157,14 @@ class Goblin(Mobile):
         Mobile.__init__(self, symbol, x, y, hp)
 
 
+class Treasure(Tangible):
+    def __init__(self, x, y):
+        Tangible.__init__(self, "T", x, y)
+
 g = Game()  # creating a new game
 g.add_mob(Player())  # add a player to the game
 g.add_mob(Goblin())  # adding a monster to the game
+g.add_thing(Treasure(9, 4))
 while g.playing:  # while the game is playing, play
     g.draw_maze()  # draw the map
     for m in g.mobs:  # for each mobile object in the game
