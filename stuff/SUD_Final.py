@@ -130,7 +130,7 @@ class Player(Mobile):
         return x, y
 
 
-class Goblin(Mobile, Visible, Damageable):
+class Goblin(Mobile):
     """
     An example monster
     """
