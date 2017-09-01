@@ -1,4 +1,4 @@
-from SUD_GameObjects import Tile, Mobile, Visible, Damageable
+from Revision.stuff.SUD_GameObjects import Tile, Mobile
 
 
 class Game(object):
