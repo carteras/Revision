@@ -1,6 +1,5 @@
 from Revision.stuff.SUD_GameObjects import Tile, Mobile, Tangible
 
-
 class Game(object):
     """
     Handles the core logic for the game.
